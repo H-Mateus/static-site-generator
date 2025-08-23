@@ -7,19 +7,18 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     for node in old_nodes:
         if node.text_type != TextType.TEXT:
             new_node.append(node)
-        else:
-            # check that there is a closing delim
-            count_of_delimiter = node.text.count(delimiter)
-            if count_of_delimiter % 2 != 0:
-                raise Exception(
-                    f"No closing delimiter: {delimiter} found in {node.text}"
-                )
+            continue
 
-            split_node = node.text.split(delimiter)
-
-            for i in range(len(split_node)):
-                if i % 2 == 0:
-                    new_node.append(TextNode(split_node[i], TextType.TEXT))
-                else:
-                    new_node.append(TextNode(split_node[i], text_type))
+        split_nodes = []
+        sections = node.text.split(delimiter)
+        if len(sections) % 2 == 0:
+            raise ValueError(f"No closing delimiter: {delimiter} found in {node.text}")
+        for i in range(len(sections)):
+            if sections[i] == "":
+                continue
+            if i % 2 == 0:
+                split_nodes.append(TextNode(sections[i], TextType.TEXT))
+            else:
+                split_nodes.append(TextNode(sections[i], text_type))
+        new_node.extend(split_nodes)
     return new_node
