@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from block_markdown import markdown_to_html_node
@@ -7,7 +8,7 @@ def extract_title(markdown):
     lines = markdown.split("\n")
     for line in lines:
         if line.startswith("# "):
-            return line.strip("# ")
+            return line[2:]
     raise ValueError("No level 1 header found in file")
 
 
@@ -36,3 +37,18 @@ def generate_page(from_path, template_path, dest_path):
     final_content = final_content.replace("{{ Content }}", content_html)
 
     write_variable_to_file(final_content, dest_path)
+
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    src_dir = Path(dir_path_content)
+    dest_dir = Path(dest_dir_path)
+
+    for md_file in src_dir.rglob("*.md"):
+        # Compute relative path (preserves folder structure)
+        relative_path = md_file.relative_to(src_dir)
+
+        # Change extension from .md to .html
+        dest_file = dest_dir / relative_path.with_suffix(".html")
+
+        # Generate the page
+        generate_page(md_file, template_path, dest_file)
